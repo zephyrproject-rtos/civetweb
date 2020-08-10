@@ -89,7 +89,7 @@ option(CIVETWEB_ENABLE_IPV6 "Enables the IP version 6 support" OFF)
 message(STATUS "IP Version 6 - ${CIVETWEB_ENABLE_IPV6}")
 
 # Websocket support
-option(CIVETWEB_ENABLE_WEBSOCKETS "Enable websockets connections" OFF)
+option(CIVETWEB_ENABLE_WEBSOCKETS "Enable websockets connections" ON)
 message(STATUS "Websockets support - ${CIVETWEB_ENABLE_WEBSOCKETS}")
 
 # Server statistics support
@@ -627,4 +627,3 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_PACKAGE_DEPENDS}")
 
 # Finalize CPack settings
 include(CPack)
-
