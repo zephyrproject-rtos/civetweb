@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2020 the Civetweb developers
+/* Copyright (c) 2013-2021 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -229,6 +229,10 @@ enum {
 	OPTION_WEBPAGE,
 	OPTION_ADD_DOMAIN,
 	OPTION_HIDE_TRAY,
+#if defined(DAEMONIZE)
+	ENABLE_DAEMONIZE,
+#endif
+
 	NUM_MAIN_OPTIONS
 };
 
@@ -238,6 +242,10 @@ static struct mg_option main_config_options[] = {
     {"website", MG_CONFIG_TYPE_STRING, NULL},
     {"add_domain", MG_CONFIG_TYPE_STRING_LIST, NULL},
     {"hide_tray", MG_CONFIG_TYPE_BOOLEAN, NULL},
+#if defined(DAEMONIZE)
+    {"daemonize", MG_CONFIG_TYPE_BOOLEAN, "no"},
+#endif
+
     {NULL, MG_CONFIG_TYPE_UNKNOWN, NULL}};
 
 
@@ -2276,6 +2284,32 @@ add_control(struct dlg_complete *dlg,
 }
 
 
+static int
+optioncmp(const char *o1, const char *o2)
+{
+	/* string compare for option names */
+	while (*o1 || *o2) {
+		int c1 = 256 * (int)*o1;
+		int c2 = 256 * (int)*o2;
+		if (isalpha(*o1))
+			c1 = toupper(*o1);
+		else if (*o1 == '_')
+			c1 = 1;
+		if (isalpha(*o2))
+			c2 = toupper(*o2);
+		else if (*o2 == '_')
+			c2 = 1;
+		if (c1 < c2)
+			return -1;
+		if (c1 > c2)
+			return +1;
+		o1++;
+		o2++;
+	}
+	return 0;
+}
+
+
 static void
 show_settings_dialog()
 {
@@ -2352,8 +2386,8 @@ show_settings_dialog()
 	for (;;) {
 		int swapped = 0;
 		for (i = 1; i < NO_OF_OPTIONS; i++) {
-			if (strcmp(cv_options[option_index[i - 1]].name,
-			           cv_options[option_index[i]].name)
+			if (optioncmp(cv_options[option_index[i - 1]].name,
+			              cv_options[option_index[i]].name)
 			    > 0) {
 				short swap = option_index[i];
 				option_index[i] = option_index[i - 1];

@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2020 the Civetweb developers
+/* Copyright (c) 2013-2021 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,9 +23,9 @@
 #ifndef CIVETWEB_HEADER_INCLUDED
 #define CIVETWEB_HEADER_INCLUDED
 
-#define CIVETWEB_VERSION "1.14"
+#define CIVETWEB_VERSION "1.15"
 #define CIVETWEB_VERSION_MAJOR (1)
-#define CIVETWEB_VERSION_MINOR (14)
+#define CIVETWEB_VERSION_MINOR (15)
 #define CIVETWEB_VERSION_PATCH (0)
 
 #ifndef CIVETWEB_API
@@ -151,9 +151,13 @@ struct mg_request_info {
 	const char *request_method;  /* "GET", "POST", etc */
 	const char *request_uri;     /* URL-decoded URI (absolute or relative,
 	                              * as in the request) */
-	const char *local_uri;       /* URL-decoded URI (relative). Can be NULL
+	const char *local_uri_raw;   /* URL-decoded URI (relative). Can be NULL
 	                              * if the request_uri does not address a
 	                              * resource at the server host. */
+	const char *local_uri;       /* Same as local_uri_raw, however, cleaned
+	                              * so a path like
+	                              *   allowed_dir/../forbidden_file
+	                              * is not possible. */
 #if defined(MG_LEGACY_INTERFACE) /* 2017-02-04, deprecated 2014-09-14 */
 	const char *uri;             /* Deprecated: use local_uri instead */
 #endif
@@ -326,13 +330,19 @@ struct mg_callbacks {
 	   application-maintained list of clients.
 	   Using this callback for websocket connections is deprecated: Use
 	   mg_set_websocket_handler instead.
-
-	   Connection specific data:
-	   If memory has been allocated for the connection specific user data
-	   (mg_request_info->conn_data, mg_get_user_connection_data),
-	   this is the last chance to free it.
 	*/
 	void (*connection_close)(const struct mg_connection *);
+
+	/* Called after civetweb has closed a connection.  The per-context mutex is
+	   locked when this is invoked.
+
+	Connection specific data:
+	If memory has been allocated for the connection specific user data
+	(mg_request_info->conn_data, mg_get_user_connection_data),
+	this is the last chance to free it.
+ */
+	void (*connection_closed)(const struct mg_connection *);
+
 
 	/* init_lua is called when civetweb is about to serve Lua server page.
 	   exit_lua is called when the Lua processing is complete.

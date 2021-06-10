@@ -41,7 +41,7 @@ include(AddCXXCompilerFlag)
 include(DetermineTargetArchitecture)
 include(CMakeDependentOption)
 
-set(CIVETWEB_VERSION "1.14.0" CACHE STRING "The version of the civetweb library")
+set(CIVETWEB_VERSION "1.15.0" CACHE STRING "The version of the civetweb library")
 string(REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)" CIVETWEB_VERSION_MATCH "${CIVETWEB_VERSION}")
 if ("${CIVETWEB_VERSION_MATCH}" STREQUAL "")
   message(FATAL_ERROR "Must specify a semantic version: major.minor.patch")
@@ -111,6 +111,10 @@ message(STATUS "Force x32 / x64 architecture - ${CIVETWEB_ARCH}")
 # LUA CGI support
 option(CIVETWEB_ENABLE_LUA "Enable Lua CGIs" OFF)
 message(STATUS "Lua CGI support - ${CIVETWEB_ENABLE_LUA}")
+
+# zlib compression support
+option(CIVETWEB_ENABLE_ZLIB "Enables zlib compression support" OFF)
+message(STATUS "zlib support - ${CIVETWEB_ENABLE_ZLIB}")
 
 # Enable installing CivetWeb executables
 option(CIVETWEB_INSTALL_EXECUTABLE "Enable installing CivetWeb executable" ON)
@@ -476,8 +480,11 @@ endif()
 
 
 # Set up the definitions
+option(CIVETWEB_ENABLE_DEBUG_TOOLS "For Debug builds enable verbose logging and assertions" ON)
 if (${CMAKE_BUILD_TYPE} MATCHES "[Dd]ebug")
-  add_definitions(-DDEBUG)
+  if(CIVETWEB_ENABLE_DEBUG_TOOLS)
+    add_definitions(-DDEBUG)
+  endif()
   add_definitions(-O0)
   add_definitions(-g)
 endif()
@@ -504,6 +511,9 @@ if (CIVETWEB_DISABLE_CACHING)
 endif()
 if (CIVETWEB_ENABLE_LUA)
   add_definitions(-DUSE_LUA)
+endif()
+if (CIVETWEB_ENABLE_ZLIB)
+  add_definitions(-DUSE_ZLIB)
 endif()
 if (CIVETWEB_ENABLE_DUKTAPE)
   add_definitions(-DUSE_DUKTAPE)
@@ -642,4 +652,3 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_PACKAGE_DEPENDS}")
 
 # Finalize CPack settings
 include(CPack)
-

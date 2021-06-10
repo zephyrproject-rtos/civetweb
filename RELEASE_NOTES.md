@@ -1,10 +1,36 @@
-Release Notes v1.14 (under construction)
+Release Notes v1.15 (work in progress)
 ===
-### Objectives: *TO BE DEFINED*
+### Objectives: *TBD*
 
 Changes
 -------
 
+- Update version number
+
+
+Release Notes v1.14
+===
+### Objectives: *mbedTLS, Lua API enhancements, log filtering*
+
+Changes
+-------
+
+- Change SSL default setting to use TLS 1.2 as minimum (set config if you need an earlier version)
+- Add local_uri_raw field (not sanitized URI) to request_info
+- Additional API functions and a callback after closing connections
+- Allow mbedTLS as OpenSSL alternative (basic functionality)
+- Add OpenSSL 3.0 support (OpenSSL 3.0 Alpha 13)
+- Support UNIX/Linux domain sockets
+- Fuzz tests and ossfuzz integration
+- Compression for websockets
+- Restructure some source files
+- Improve documentation
+- Fix HTTP range requests
+- Add some functions for Lua scripts/LSP
+- Build system specific fixes (CMake, MinGW)
+- Update 3rd party components (Lua, lfs, sqlite)
+- Allow Lua background script to use timers, format and filter logs
+- Remove WinCE code
 - Update version number
 
 

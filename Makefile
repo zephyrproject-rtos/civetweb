@@ -71,7 +71,7 @@ ifdef WITH_CFLAGS
   CFLAGS += $(WITH_CFLAGS)
 endif
 
-LIBS = -lpthread -lm
+LIBS = -lpthread -lm $(LOPT)
 
 ifdef WITH_DEBUG
   CFLAGS += -g -DDEBUG
@@ -93,6 +93,13 @@ endif
 
 ifdef NO_SSL
   CFLAGS += -DNO_SSL
+else ifdef WITH_MBEDTLS
+  CFLAGS += -DUSE_MBEDTLS
+  LIBS += -lmbedcrypto -lmbedtls -lmbedx509
+else ifdef WITH_OPENSSL_API_1_0
+  CFLAGS += -DOPENSSL_API_1_0
+else ifdef WITH_OPENSSL_API_1_1
+  CFLAGS += -DOPENSSL_API_1_1
 else
   #Use OpenSSL 1.1 API version as default
   CFLAGS += -DOPENSSL_API_1_1
@@ -288,6 +295,9 @@ help:
 	@echo "   WITH_CPP=1            build library with c++ classes"
 	@echo "   WITH_EXPERIMENTAL=1   build with experimental features"
 	@echo "   WITH_DAEMONIZE=1      build with daemonize."
+	@echo "   WITH_MBEDTLS=1        build with mbedTLS support.
+	@echo "   WITH_OPENSSL_API_1_0=1  build with OpenSSL 1.0.x support."
+	@echo "   WITH_OPENSSL_API_1_1=1  build with OpenSSL 1.1.x support."
 	@echo "   NO_SSL=1              build without SSL support. Build will not need libcrypto/libssl."
 	@echo "   NO_CGI=1              build without CGI support."
 	@echo "   NO_CACHING=1          disable caching. Send no-cache/no-store headers."
@@ -300,6 +310,7 @@ help:
 	@echo "   CRYPTO_LIB=libcrypto.so.0 system versioned CRYPTO library"
 	@echo "   PREFIX=/usr/local     sets the install directory"
 	@echo "   COPT='-DNO_SSL'       method to insert compile flags"
+	@echo "   LOPT='-lxxx'          method to link xxx library"
 	@echo ""
 	@echo " Compile Flags"
 	@echo "   NDEBUG                strip off all debug code"
@@ -397,7 +408,7 @@ lib$(CPROG).so: CFLAGS += -fPIC
 lib$(CPROG).so: $(LIB_OBJECTS)
 	$(eval version=$(shell grep -w "define CIVETWEB_VERSION" include/civetweb.h | sed 's|.*VERSION "\(.*\)"|\1|g'))
 	$(eval major=$(shell echo $(version) | cut -d'.' -f1))
-	$(LCC) -shared -Wl,-soname,$@.$(major) -o $@.$(version).0 $(CFLAGS) $(LDFLAGS) $(LIB_OBJECTS)
+	$(LCC) -shared -Wl,-soname,$@.$(major) -o $@.$(version).0 $(CFLAGS) $(LDFLAGS) $(LIB_OBJECTS) $(LIBS)
 	ln -s -f $@.$(major) $@
 	ln -s -f $@.$(version).0 $@.$(major)
 

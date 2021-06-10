@@ -396,6 +396,7 @@ CivetServer::CivetServer(const char **options,
     : context(0)
 {
 	struct CivetCallbacks callbacks;
+	memset(&callbacks, 0, sizeof(callbacks));
 
 	UserContext = UserContextIn;
 
@@ -407,9 +408,10 @@ CivetServer::CivetServer(const char **options,
 	}
 	callbacks.connection_close = closeHandler;
 	context = mg_start(&callbacks, this, options);
-	if (context == NULL)
+	if (context == NULL) {
 		throw CivetException("null context when constructing CivetServer. "
 		                     "Possible problem binding to port.");
+	}
 }
 
 CivetServer::CivetServer(const std::vector<std::string> &options,
@@ -418,6 +420,7 @@ CivetServer::CivetServer(const std::vector<std::string> &options,
     : context(0)
 {
 	struct CivetCallbacks callbacks;
+	memset(&callbacks, 0, sizeof(callbacks));
 
 	UserContext = UserContextIn;
 
@@ -540,6 +543,14 @@ CivetServer::getHeader(struct mg_connection *conn,
                        const std::string &headerName)
 {
 	return mg_get_header(conn, headerName.c_str());
+}
+
+const char *
+CivetServer::getMethod(struct mg_connection *conn)
+{
+	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	assert(request_info != NULL);
+	return request_info->request_method;
 }
 
 void
