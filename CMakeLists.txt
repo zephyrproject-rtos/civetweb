@@ -290,6 +290,12 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   endif()
 endif()
 
+if (ZEPHYR)
+  if (CONFIG_ATOMIC_OPERATIONS_C)
+    add_compile_definitions(NO_ATOMICS)
+  endif()
+endif()
+
 # Configure the C compiler
 message(STATUS "Configuring C Compiler")
 if ("${CIVETWEB_C_STANDARD}" STREQUAL "auto")
